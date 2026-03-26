@@ -1,0 +1,98 @@
+<head>
+    <meta name = "viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static',filename='styles.css')}}">
+</head>
+<body>
+    <div class="container">
+        <h2>Deposit Money</h2>
+        <input type="text" id="depositor" placeholder="Enter Depositor Address">
+        <input type="text" id="amount" placeholder="Enter Deposit Amount">
+        <button class="btn" onclick="deposit()">Deposit</button>
+        <button class="btn" onclick="viewDeposit()">View Transaction</button>
+        </button>
+        <form action="/main" method="post">
+            <input type = "submit" value="Main">
+        </form>
+        <p id="view_depositor"></p>
+        <p id="view_amount"></p>
+        <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+        <script>
+            const contractAddress = "0xf89ad27a67333d9c93487dc7e70e300b84dfdbfc";
+            const contractABI = [
+            {
+                "inputs": [
+                    {
+                        "internalType": "address",
+                        "name": "_depositor",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "_amount",
+                        "type": "uint256"
+                    }
+                ],
+                "name": "deposit",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "checkDeposit",
+                "outputs": [
+                    {
+                        "internalType": "address",
+                        "name": "",
+                        "type": "address"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+            ];
+
+        const web3 = new Web3(Web3.givenProvider);
+        const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+        function getContract() {
+            if (!contractAddress) {
+                alert("Please add the deployed contract address first.");
+                return null;
+            }
+            return contract;
+        }
+
+        async function deposit(){
+            const selectedContract = getContract();
+            if (!selectedContract) {
+                return;
+            }
+
+            const accounts = await web3.eth.requestAccounts();
+            const depositor = document.getElementById("depositor").value;
+            const amount = document.getElementById("amount").value;
+            console.log(depositor, amount);
+
+            await selectedContract.methods.deposit(depositor, amount).send({from:accounts[0]});
+        }
+
+        async function viewDeposit(){
+            const selectedContract = getContract();
+            if (!selectedContract) {
+                return;
+            }
+
+            const result = await selectedContract.methods.checkDeposit().call();
+            document.getElementById('view_depositor').innerText = "Depositor is " + result[0];
+            document.getElementById('view_amount').innerText = "Amount is " + result[1];
+        }
+        </script>
+    </div>
+
+</body>

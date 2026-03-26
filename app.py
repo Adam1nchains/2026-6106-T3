@@ -1,6 +1,7 @@
 from flask import Flask,render_template,request
 
 app = Flask(__name__)
+app.config["TEMPLATES_AUTO_RELOAD"] = True
 
 @app.route("/",methods=["GET","POST"])
 def index():
@@ -15,6 +16,10 @@ def main():
 def transferMoney():
     return(render_template("transferMoney.html"))
 
+@app.route("/depositMoney",methods=["GET","POST"])
+def depositMoney():
+    return(render_template("depositMoney.html"))
+
 
 if __name__ == "__main__":
-    app.run()
+    app.run(debug=True)
