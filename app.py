@@ -20,6 +20,10 @@ def transferMoney():
 def depositMoney():
     return(render_template("depositMoney.html"))
 
+@app.route("/simpleVoting",methods=["GET","POST"])
+def simpleVoting():
+    return(render_template("simpleVoting.html"))
+
 
 if __name__ == "__main__":
     app.run(debug=True)

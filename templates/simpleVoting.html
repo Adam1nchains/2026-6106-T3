@@ -1,0 +1,121 @@
+<head>
+    <meta name = "viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{url_for('static',filename='styles.css')}}">
+</head>
+<body>
+    <div class="container">
+        <h2>Simple Voting</h2>
+        <input type="text" id="candidate" placeholder="Enter Candidate Name">
+        <button class="btn" onclick="vote()">Vote</button>
+        <button class="btn" onclick="viewVotes()">View Votes</button>
+        <button class="btn" onclick="viewLastVote()">View Last Vote</button>
+        <form action="/main" method="post">
+            <input type = "submit" value="Main">
+        </form>
+        <p id="view_candidate"></p>
+        <p id="view_vote_count"></p>
+        <script src="https://cdn.jsdelivr.net/npm/web3@1.5.2/dist/web3.min.js"></script>
+        <script>
+            const contractAddress = "0x87C145bcf9BA82e6Bb7E391fC2208E17B6d2974D";
+            const contractABI = [
+            {
+                "inputs": [
+                    {
+                        "internalType": "string",
+                        "name": "_candidate",
+                        "type": "string"
+                    }
+                ],
+                "name": "vote",
+                "outputs": [],
+                "stateMutability": "nonpayable",
+                "type": "function"
+            },
+            {
+                "inputs": [
+                    {
+                        "internalType": "string",
+                        "name": "_candidate",
+                        "type": "string"
+                    }
+                ],
+                "name": "getVotes",
+                "outputs": [
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            },
+            {
+                "inputs": [],
+                "name": "checkLastVote",
+                "outputs": [
+                    {
+                        "internalType": "string",
+                        "name": "",
+                        "type": "string"
+                    },
+                    {
+                        "internalType": "uint256",
+                        "name": "",
+                        "type": "uint256"
+                    }
+                ],
+                "stateMutability": "view",
+                "type": "function"
+            }
+            ];
+
+        const web3 = new Web3(Web3.givenProvider);
+        const contract = new web3.eth.Contract(contractABI, contractAddress);
+
+        function getContract() {
+            if (!contractAddress) {
+                alert("Please add the deployed contract address first.");
+                return null;
+            }
+            return contract;
+        }
+
+        async function vote(){
+            const selectedContract = getContract();
+            if (!selectedContract) {
+                return;
+            }
+
+            const accounts = await web3.eth.requestAccounts();
+            const candidate = document.getElementById("candidate").value;
+
+            await selectedContract.methods.vote(candidate).send({from:accounts[0]});
+        }
+
+        async function viewVotes(){
+            const selectedContract = getContract();
+            if (!selectedContract) {
+                return;
+            }
+
+            const candidate = document.getElementById("candidate").value;
+            const result = await selectedContract.methods.getVotes(candidate).call();
+            document.getElementById('view_candidate').innerText = "Candidate is " + candidate;
+            document.getElementById('view_vote_count').innerText = "Vote count is " + result;
+        }
+
+        async function viewLastVote(){
+            const selectedContract = getContract();
+            if (!selectedContract) {
+                return;
+            }
+
+            const result = await selectedContract.methods.checkLastVote().call();
+            document.getElementById('view_candidate').innerText = "Last candidate is " + result[0];
+            document.getElementById('view_vote_count').innerText = "Current vote count is " + result[1];
+        }
+        </script>
+    </div>
+
+</body>
